@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# The published site (GitHub Pages project site)
+Sitemap: https://omgarzon.github.io/Electronic-design/sitemap.xml
