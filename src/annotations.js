@@ -39,7 +39,7 @@ export const ANCHORS = [
     position: [0.74, 0.44, -0.4],
     meta: 'Airframe · rotor',
     title: 'Folding rotor set',
-    body: 'Four 1.2 kW brushless motors on 24-inch folding props. The aircraft collapses into a 620 mm case for one-person transport.',
+    body: 'Four 1.2 kW brushless motors on 2.4-inch folding props. The aircraft collapses into a 62 mm case for one-person transport.',
     side: 'right',
   },
 ];

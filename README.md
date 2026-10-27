@@ -101,15 +101,16 @@ PMB-1.3 airframe. The drone reacts both to the pilot and to the virtual
 environment: gusts push it off course, walls and rubble are solid, the gimbal
 locks onto cracks inside its sensor cone, and the pack drains with the work.
 
-### True scale, no rescaling
+### 0.1× airframe, metre-scale course
 
-The GLB is authored in metres (measured bounding box **1.869 × 0.770 × 1.577 m**),
-and the game never scales it. The whole course shares that metre grid: a 1 m
-ground grid, a **1.70 m human reference figure**, a **2.10 × 0.90 m doorway**,
-2.4 m gate openings sized against the 1.87 m prop-tip span, and a live HUD scale
-bar derived from the camera projection. In WebXR the course is placed with a
-hit-test at real 1:1 scale, so the drone occupies the same volume in the room
-that it would on site.
+The GLB is authored at 0.1× scale: its measured bounding box is
+**0.187 × 0.077 × 0.158 m** — a 0.187 m prop-tip span, 0.077 m tall and
+0.158 m long — and the game never scales it. The course itself keeps its real
+metre grid: a 1 m ground grid, a **1.70 m human reference figure**, a
+**2.10 × 0.90 m doorway**, 2.4 m gate openings, and a live HUD scale bar
+derived from the camera projection. In WebXR the course is placed with a hit-test at
+real 1:1 scale, so the yard occupies the same volume in the room that it would
+on site.
 
 ### Two ways to play
 
