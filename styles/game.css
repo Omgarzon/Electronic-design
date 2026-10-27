@@ -138,6 +138,14 @@ button { font-family: inherit; }
 .panel h1 span { color: var(--accent); }
 .panel p { color: var(--muted); line-height: 1.65; }
 .menu__error { color: var(--danger); }
+.menu__warning {
+  color: var(--amber);
+  border: 1px solid rgba(255, 179, 92, 0.35);
+  background: rgba(255, 179, 92, 0.08);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.88rem;
+}
 
 .briefing {
   margin: 1rem 0;
@@ -219,6 +227,29 @@ button { font-family: inherit; }
   transition: width 0.2s var(--ease);
 }
 .screen--compact .panel { width: min(460px, 100%); text-align: center; }
+
+/* ── graphics failure overlay ───────────────────────────────────────────
+   Sits above every other layer (HUD, toasts, menus) and paints an opaque
+   backdrop so it stays readable even if the GPU/compositor took the canvas
+   and the rest of the page to black. */
+#screen-fatal {
+  z-index: 50;
+  background: radial-gradient(ellipse at 50% 30%, rgba(48, 22, 24, 0.95), rgba(4, 7, 10, 0.99));
+}
+.panel__eyebrow--danger { color: var(--danger); }
+.fatal__message {
+  color: var(--ink);
+  background: rgba(255, 122, 122, 0.08);
+  border: 1px solid rgba(255, 122, 122, 0.3);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  text-align: left;
+  word-break: break-word;
+}
+#screen-fatal .menu__note { text-align: left; }
+#screen-fatal .menu__back { display: inline-block; }
 
 /* ── HUD shell ────────────────────────────────────────────────────────── */
 .hud {
