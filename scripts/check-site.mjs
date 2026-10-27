@@ -60,7 +60,19 @@ async function checkLocalReferences() {
     !/^(?:https?:|data:|mailto:|tel:|#|\/\/)/.test(value) &&
     !value.startsWith('//');
 
-  const files = ['index.html', '404.html', 'styles/main.css', 'src/main.js', 'src/viewer.js', 'src/annotations.js'];
+  const files = [
+    'index.html',
+    '404.html',
+    'game.html',
+    'styles/main.css',
+    'styles/game.css',
+    'src/main.js',
+    'src/viewer.js',
+    'src/annotations.js',
+  ];
+  for (const entry of await readdir(join(ROOT, 'src/game'), { withFileTypes: true })) {
+    if (entry.isFile() && entry.name.endsWith('.js')) files.push(`src/game/${entry.name}`);
+  }
 
   for (const file of files) {
     const source = await readFile(join(ROOT, file), 'utf8');
@@ -95,16 +107,18 @@ async function checkLocalReferences() {
     }
   }
 
-  // import map targets
-  const html = await readFile(join(ROOT, 'index.html'), 'utf8');
-  const map = html.match(/<script type="importmap">([\s\S]*?)<\/script>/);
-  if (map) {
-    const { imports } = JSON.parse(map[1]);
-    for (const [name, target] of Object.entries(imports)) {
-      if (target.endsWith('/')) {
-        if (!(await exists(join(ROOT, target)))) problems.push(`import map target ${target} is missing`);
-      } else if (!(await exists(join(ROOT, target)))) {
-        problems.push(`import map target ${name} → ${target} is missing`);
+  // import map targets (every HTML page ships the same vendor map)
+  for (const htmlFile of ['index.html', 'game.html']) {
+    const html = await readFile(join(ROOT, htmlFile), 'utf8');
+    const map = html.match(/<script type="importmap">([\s\S]*?)<\/script>/);
+    if (map) {
+      const { imports } = JSON.parse(map[1]);
+      for (const [name, target] of Object.entries(imports)) {
+        if (target.endsWith('/')) {
+          if (!(await exists(join(ROOT, target)))) problems.push(`${htmlFile}: import map target ${target} is missing`);
+        } else if (!(await exists(join(ROOT, target)))) {
+          problems.push(`${htmlFile}: import map target ${name} → ${target} is missing`);
+        }
       }
     }
   }

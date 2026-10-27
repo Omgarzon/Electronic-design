@@ -15,6 +15,7 @@ const OUT = join(ROOT, '_site');
 /** Files and folders copied verbatim, in this order. */
 const INCLUDE = [
   'index.html',
+  'game.html',
   '404.html',
   'robots.txt',
   'sitemap.xml',
