@@ -66,12 +66,12 @@ to `main`. To switch it on **once**:
 The site then lives at `https://<owner>.github.io/<repo>/`, e.g.
 <https://omgarzon.github.io/Electronic-design/>.
 
-> **This repository's Pages source is currently "Deploy from a branch" (`main`).**
-> That mode still publishes the site (`index.html` sits at the root and every path is
-> relative, and `_config.yml` keeps the 45 MB source exports and the tooling out of the
-> build), but it bypasses the optimized pipeline. Switching the source to
-> **GitHub Actions** is what publishes the prepared `_site` — ~9 MB instead of ~54 MB.
-> Until it is switched, the deploy job logs a warning and skips rather than failing.
+> **Pages source.** `deploy-pages` needs **Settings → Pages → Source = "GitHub Actions"**.
+> The deploy job holds `pages: write`, so it flips that setting itself on its first run.
+> If the token cannot, it logs a warning naming the toggle and skips instead of failing —
+> and the branch build keeps serving the site in the meantime (`_config.yml` keeps the
+> 45 MB source exports and the tooling out of that build, so even that mode publishes a
+> lean ~9 MB site).
 
 Everything is relative to the page (`./src/main.js`, `assets/...`, `./assets/vendor/...`),
 so it works identically at a project path, a user site root, or a custom domain. No `base`
