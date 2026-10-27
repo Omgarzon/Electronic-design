@@ -464,6 +464,11 @@ pre {
   transform: scaleX(1);
 }
 
+.site-nav a.site-nav__game {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .site-header__actions {
   display: flex;
   align-items: center;

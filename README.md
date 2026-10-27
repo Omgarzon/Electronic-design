@@ -16,11 +16,14 @@ works offline-first and never depends on a third-party host.
 | Path | What it is |
 | --- | --- |
 | `index.html` | The single page: hero with the live 3D stage, mission, payload, specifications, model downloads |
+| `game.html` | **Inspection Run** — the mixed-reality flight game (menu, HUD, joysticks, debrief) |
 | `404.html` | Styled not-found page, resolved from any deploy path |
 | `styles/main.css` | Design system, layout and responsive rules |
+| `styles/game.css` | Standalone stylesheet for the game UI |
 | `src/main.js` | Navigation, reveals, tabs, annotation UI and dock wiring (no Three.js) |
 | `src/viewer.js` | The Three.js scene: lighting, shadows, turntable floor, camera framing, snapshots |
 | `src/annotations.js` | Callout data for the four model annotations |
+| `src/game/` | The game: flight model, drone rig, inspection course, WebXR session, HUD, audio |
 | `assets/models/*.glb` | Web builds of the model — meshopt + quantization + WebP (24.6 MB → 3.1 MB) |
 | `assets/vendor/three/` | Three.js r186 core and the four addons the viewer uses |
 | `assets/fonts/` | Self-hosted Space Grotesk and Inter variables (SIL OFL) |
@@ -88,6 +91,80 @@ tag or path configuration is needed. The `404.html` page resolves the correct ro
   copies can't drift silently.
 
 ---
+
+## Inspection Run — the mixed-reality game
+
+**Play it → <https://omgarzon.github.io/Electronic-design/game.html>**
+
+`game.html` is an interactive merged-reality flight game built around the same
+PMB-1.3 airframe. The drone reacts both to the pilot and to the virtual
+environment: gusts push it off course, walls and rubble are solid, the gimbal
+locks onto cracks inside its sensor cone, and the pack drains with the work.
+
+### True scale, no rescaling
+
+The GLB is authored in metres (measured bounding box **1.869 × 0.770 × 1.577 m**),
+and the game never scales it. The whole course shares that metre grid: a 1 m
+ground grid, a **1.70 m human reference figure**, a **2.10 × 0.90 m doorway**,
+2.4 m gate openings sized against the 1.87 m prop-tip span, and a live HUD scale
+bar derived from the camera projection. In WebXR the course is placed with a
+hit-test at real 1:1 scale, so the drone occupies the same volume in the room
+that it would on site.
+
+### Two ways to play
+
+- **Simulator** — full damaged-structure yard in the browser: five cracks to
+  grade (two visible only through the thermal core), three fly-through gates,
+  a gust can, collisions, hull and battery state, and an RTH autopilot.
+- **Mixed reality (WebXR `immersive-ar`)** — on an ARCore phone, tap a real
+  floor to place a room-sized course (3.2 m flight radius, 3 m ceiling) and fly
+  the same physics through camera passthrough. Unsupported devices fall back
+  to the simulator automatically.
+
+### Drone mechanics
+
+- Attitude-mode quadcopter dynamics in `src/game/flight-model.js` (pure,
+  framework-free math, unit-exercised in Node): collective thrust against
+  9.81 m/s² gravity, rate-limited pitch/roll self-levelling, yaw rate, drag,
+  ground contact and per-rotor RPM.
+- Four rotor blur discs on the real motor masts, ground-effect wash ring, and
+  a three-axis gimbal rig that counter-rotates to hold a world-frame lock while
+  the airframe tilts — the stabilization the payload advertises.
+- Dual-sensor scanning: hold the reticle on a crack inside range, inside the
+  sensor cone, below the steadiness speed limit; thermal cracks require the
+  radiometric core. A simulated 48 MP / 640 × 512 feed runs in the HUD PIP.
+- Battery budget with a 20 % automatic RTH, dead-stick falls, hard-landing and
+  collision damage, plus a score/grade debrief.
+
+### Controls
+
+| Input | Action |
+| --- | --- |
+| `W`/`S` or `↑`/`↓` | Pitch forward / back |
+| `A`/`D` or `←`/`→` | Yaw |
+| `Space` / `C` | Climb / descend |
+| `Q` / `E` | Strafe |
+| `Shift` | Brake / hover |
+| `F` (hold) | Scan with the selected sensor |
+| `T` · `H` · `Enter` · `P` · `M` | Thermal · RTH · takeoff/land · pause · mute |
+| Touch | Left stick climb/yaw, right stick pitch/roll, on-screen action buttons |
+| Mouse | Drag to orbit the chase camera, scroll to zoom |
+
+The game modules live in `src/game/`:
+
+| File | Responsibility |
+| --- | --- |
+| `config.js` | Measured drone dimensions, flight envelope, sensor and scoring constants |
+| `flight-model.js` | Pure flight physics, sphere/box collision, gimbal line-of-sight |
+| `drone.js` | GLB rig: tilt pivot, rotor discs, stabilized gimbal, sensor beam |
+| `world.js` | Procedural metre-scale course, crack targets, gates, gusts, colliders |
+| `textures.js` | Seeded canvas textures (concrete, crack decals, rotor blur, pad, labels) |
+| `input.js` | Keyboard and dual virtual joysticks with an edge-action queue |
+| `hud.js` | Telemetry, artificial horizon, reticle, sensor PIP, minimap, scale bar |
+| `audio.js` | Synthesized rotor bed (RPM-coupled) and mission sound effects |
+| `ar.js` | WebXR session, hit-test source and placement reticle |
+| `game.js` | State machine, mission loop, scanning, collisions, autopilot, scoring |
+| `main.js` | Bootstrap, mode selection and screen flow |
 
 ## The 3D stage
 
