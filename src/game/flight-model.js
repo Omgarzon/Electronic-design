@@ -86,6 +86,9 @@ export function stepFlight(s, cmd, wind = [0, 0, 0], dt = 1 / 60) {
     yaw: clamp(cmd.yaw || 0, -1, 1),
     pitch: clamp(cmd.pitch || 0, -1, 1),
     roll: clamp(cmd.roll || 0, -1, 1),
+    // Without this the dead-stick branch below can never run: the flag
+    // arrives on cmd but was dropped while building the local command.
+    deadStick: Boolean(cmd.deadStick),
   };
 
   /* ── attitude: rate-limited first-order tracker, self-levelling ──────── */

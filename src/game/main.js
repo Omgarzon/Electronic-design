@@ -2,20 +2,63 @@
  * main.js — bootstrap and screen flow for the PMB-1.3 inspection game.
  *
  * The heavy Three.js stack is imported dynamically after the menu paints,
- * mirroring the marketing page's lazy-loading approach.
+ * mirroring the marketing page's lazy-loading approach. All graphics
+ * capability checks and quality tiers live in graphics.js.
  */
 import { Game } from './game.js';
 import { arSupported } from './ar.js';
+import { detectGraphics } from './graphics.js';
 
 const $ = (sel) => document.querySelector(sel);
 
-function webglOK() {
-  try {
-    const canvas = document.createElement('canvas');
-    return Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl'));
-  } catch {
-    return false;
+/** Which full-screen DOM layer belongs to each game phase. */
+const PHASE_SCREEN = {
+  menu: 'screen-menu',
+  placing: 'screen-placing',
+  paused: 'screen-pause',
+  ended: 'screen-results',
+  flying: null,
+};
+
+function showScreen(id) {
+  // Only the overlay sections carry a data-screen flag and must be toggled.
+  // The <body> element also has data-screen (a static state hook in
+  // game.html); selecting it here would set body.hidden = true on the first
+  // screen change, hiding the whole document — audio keeps playing on a
+  // completely black page, which was the reported black-screen bug.
+  document.querySelectorAll('section[data-screen]').forEach((s) => {
+    s.hidden = s.id !== id;
+  });
+}
+
+/** Render a fatal graphics/render problem into the dedicated overlay. */
+function showFatal({ title, message, advice }) {
+  $('#fatal-title').textContent = title;
+  $('#fatal-message').textContent = message;
+  const adviceEl = $('#fatal-advice');
+  if (advice) {
+    adviceEl.hidden = false;
+    adviceEl.textContent = advice;
+  } else {
+    adviceEl.hidden = true;
   }
+  showScreen('screen-fatal');
+}
+
+/** Append an amber/red note to the menu without replacing the briefing. */
+function addMenuNote(text, kind = 'warning') {
+  const note = document.createElement('p');
+  note.className = kind === 'error' ? 'menu__error' : 'menu__warning';
+  note.textContent = text;
+  const anchor = $('#menu-intro');
+  anchor.insertAdjacentElement('afterend', note);
+}
+
+/** Reload the current page with ?quality=low appended/replaced. */
+function reloadWithLowQuality() {
+  const url = new URL(window.location.href);
+  url.searchParams.set('quality', 'low');
+  window.location.href = url.toString();
 }
 
 async function boot() {
@@ -25,10 +68,24 @@ async function boot() {
   const launchers = menu.querySelectorAll('[data-launch]');
   launchers.forEach((b) => (b.disabled = true));
 
-  if (!webglOK()) {
-    $('#menu-intro').innerHTML =
-      '<p class="menu__error">This browser has no WebGL support, so the inspection sortie cannot run. Try a current version of Chrome, Edge, Safari or Firefox.</p>';
+  const graphics = detectGraphics();
+  if (!graphics.webgl) {
+    addMenuNote(
+      'This browser has no working WebGL support, so the inspection sortie cannot run. Update to a current version of Chrome, Edge, Safari or Firefox, or enable hardware acceleration in the browser settings.',
+      'error',
+    );
     return;
+  }
+
+  // Software rasterisers (SwiftShader / llvmpipe / disabled GPU) can create a
+  // context but not sustain the scene — the Game auto-selects its low-fidelity
+  // tier; say so up front rather than failing onto a black canvas.
+  if (graphics.software) {
+    addMenuNote(
+      'Hardware acceleration is unavailable on this device (software WebGL detected). The game starts in reduced-graphics mode: no anti-aliasing, capped resolution and 1024px shadow maps.',
+    );
+  } else if (graphics.forced === 'low') {
+    addMenuNote('Reduced-graphics mode is on (?quality=low). Use ?quality=high to force the full renderer.');
   }
 
   const arOK = await arSupported();
@@ -71,6 +128,15 @@ async function boot() {
         'The AR session could not start. Check camera permissions and ARCore support — the simulator is still available.';
       showScreen('screen-menu');
     },
+    onFatal(detail) {
+      document.body.dataset.playing = 'false';
+      showFatal(detail);
+    },
+    onFatalRecover() {
+      // Return to whichever layer matches the phase the sortie is paused in.
+      showScreen(PHASE_SCREEN[game.phase] ?? 'screen-menu');
+      if (game.phase === 'flying') $('#hud').hidden = false;
+    },
   };
 
   const game = new Game(canvas, callbacks);
@@ -107,12 +173,9 @@ async function boot() {
   $('#pause-quit').addEventListener('click', () => window.location.reload());
   $('#results-retry').addEventListener('click', () => game.start(false));
   $('#results-menu').addEventListener('click', () => window.location.reload());
-}
 
-function showScreen(id) {
-  document.querySelectorAll('[data-screen]').forEach((s) => {
-    s.hidden = s.id !== id;
-  });
+  $('#fatal-reload').addEventListener('click', () => window.location.reload());
+  $('#fatal-reload-low').addEventListener('click', reloadWithLowQuality);
 }
 
 function fillResults(data) {
@@ -137,11 +200,14 @@ function fillResults(data) {
 
 boot().catch((err) => {
   console.error(err);
-  const note = document.querySelector('#menu-intro');
-  if (note) {
-    note.insertAdjacentHTML(
-      'beforeend',
-      `<p class="menu__error">Could not start the game: ${err.message}</p>`,
-    );
-  }
+  // Never leave the player on a black canvas: force the menu back on and
+  // keep every launch button disabled with an explanatory error.
+  showScreen('screen-menu');
+  document.body.dataset.playing = 'false';
+  addMenuNote(`Could not start the game: ${err?.message || err}`, 'error');
+  document
+    .querySelectorAll('#screen-menu [data-launch]')
+    .forEach((b) => {
+      b.disabled = true;
+    });
 });

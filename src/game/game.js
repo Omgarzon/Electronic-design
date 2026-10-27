@@ -29,6 +29,7 @@ import { InputManager } from './input.js';
 import { Hud } from './hud.js';
 import { Sfx } from './audio.js';
 import { ARSession } from './ar.js';
+import { detectGraphics, QUALITY_PROFILES } from './graphics.js';
 
 const MODES = { MENU: 'menu', PLACING: 'placing', FLYING: 'flying', PAUSED: 'paused', ENDED: 'ended' };
 const PAR_SECONDS = 240;
@@ -60,6 +61,12 @@ export class Game {
     this.camEl = 0.32;
     this.camDistance = 4.4;
     this._dragging = false;
+    // Slow menu turntable phase; drag offsets (camAz/camEl) ride on top of it.
+    this._menuAngle = 0.6;
+    this._fatalShown = false;
+    this._reduceMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   async init(mode, sandbox, onProgress = () => {}) {
@@ -67,15 +74,28 @@ export class Game {
     this.sandbox = sandbox;
     const ar = mode === 'ar';
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas,
-      antialias: true,
-      alpha: true, // required so an AR session can show camera passthrough
-      powerPreference: 'high-performance',
-    });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Software rasterisers and ?quality=low automatically take the safe tier.
+    this.quality = detectGraphics().quality;
+
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas: this.canvas,
+        antialias: this.quality.antialias,
+        alpha: true, // required so an AR session can show camera passthrough
+        powerPreference: 'high-performance',
+      });
+    } catch (err) {
+      // Rethrow with an actionable message; main.js boot() renders it into
+      // the menu instead of leaving a black canvas behind.
+      throw new Error(`WebGL renderer could not be created: ${err.message}`);
+    }
+    this.renderer = renderer;
+    this.renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio || 1, this.quality.pixelRatioCap),
+    );
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = this.quality.shadows;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     if (ar) this.renderer.setClearColor(0x000000, 0);
@@ -90,16 +110,25 @@ export class Game {
       120,
     );
     this.camera.position.set(4.5, 3.2, -5.5);
+    // Without this the menu camera points into empty fog (near-black) until
+    // the first sortie starts.
+    this.camera.lookAt(0, 0.5, 0);
 
-    const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    // Keep a reference so the environment can be rebuilt after a GPU reset:
+    // a PMREM render target only exists in GPU memory and does not survive a
+    // lost-and-restored context.
+    this._pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment = this._pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
     /* lights */
     this.hemi = new THREE.HemisphereLight(0xbfd4e6, 0x3a332c, ar ? 0.85 : 0.65);
     this.scene.add(this.hemi);
     this.sun = new THREE.DirectionalLight(0xfff2dd, ar ? 1.1 : 1.5);
-    this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(2048, 2048);
+    this.sun.castShadow = this.quality.shadows;
+    this.sun.shadow.mapSize.set(
+      this.quality.shadowMapSize,
+      this.quality.shadowMapSize,
+    );
     const reach = ar ? 6 : 13;
     this.sun.shadow.camera.left = -reach;
     this.sun.shadow.camera.right = reach;
@@ -132,8 +161,92 @@ export class Game {
     this.ar.onPlace = (matrix) => this._placeYard(matrix);
     this.ar.onEnd = () => this.cb.onQuit?.();
 
+    // A Windows GPU-process crash fires this on the canvas. Without a
+    // handler the page just sits black with audio still running; with
+    // preventDefault the browser will attempt a restore and we surface an
+    // overlay so WebGL can never fail silently again.
+    this.canvas.addEventListener('webglcontextlost', this._onContextLost);
+    this.canvas.addEventListener('webglcontextrestored', this._onContextRestored);
+
     this.clock = new THREE.Clock();
     this.renderer.setAnimationLoop(this._tick);
+  }
+
+  /* ── graphics failure recovery ───────────────────────────────────────── */
+
+  /**
+   * Show the DOM fatal overlay (via the boot callback) and remember the mute
+   * state so the rotor hum does not play over a black screen.
+   */
+  _showFatal(title, message, advice) {
+    if (this._fatalShown) return;
+    this._fatalShown = true;
+    this._mutedBeforeFatal = this.sfx ? this.sfx.muted : false;
+    this.sfx?.setMuted?.(true);
+    this.cb.onFatal?.({ title, message, advice });
+  }
+
+  _onContextLost = (event) => {
+    event.preventDefault();
+    // Three's own renderer also no-ops while the context is gone; stop
+    // scheduling frames so the loop cannot spin against a dead GL context.
+    this.renderer.setAnimationLoop(null);
+    this._showFatal(
+      'Graphics context lost',
+      'The browser lost its WebGL graphics context. On Windows this usually means the GPU process crashed under the render load — the sortie is paused, not lost.',
+      'Reload to restart, or use reduced graphics (lower resolution, no MSAA, smaller shadow maps) if this keeps happening.',
+    );
+  };
+
+  _onContextRestored = () => {
+    if (!this._fatalShown) return;
+    try {
+      // Three r186 rebuilds its GL state caches itself, but the PMREM
+      // environment and shadow render targets only lived in GPU memory.
+      this._rebuildGpuResources();
+      this._downgradeGraphics();
+      this._fatalShown = false;
+      this.sfx?.setMuted?.(this._mutedBeforeFatal ?? false);
+      this.clock.getDelta();
+      this.renderer.setAnimationLoop(this._tick);
+      this.cb.onFatalRecover?.();
+    } catch (err) {
+      console.error('[pmb-1.3] context restore failed', err);
+      this._showFatal(
+        'Graphics context lost',
+        `The context came back but the scene could not be rebuilt: ${err.message || err}`,
+        'Reload the page to restart the sortie.',
+      );
+    }
+  };
+
+  /** Recreate render-target-only resources after a context restore. */
+  _rebuildGpuResources() {
+    this._pmrem?.dispose();
+    this._pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment?.dispose?.();
+    this.scene.environment = this._pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    if (this.sun.shadow.map) {
+      this.sun.shadow.map.dispose();
+      this.sun.shadow.map = null; // recreated at the new mapSize next frame
+    }
+  }
+
+  /** Drop to the safe fidelity tier live, used after a context restore. */
+  _downgradeGraphics() {
+    this.quality = QUALITY_PROFILES.low;
+    this.renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio || 1, QUALITY_PROFILES.low.pixelRatioCap),
+    );
+    this.sun.castShadow = QUALITY_PROFILES.low.shadows;
+    this.sun.shadow.mapSize.set(
+      QUALITY_PROFILES.low.shadowMapSize,
+      QUALITY_PROFILES.low.shadowMapSize,
+    );
+    if (this.sun.shadow.map) {
+      this.sun.shadow.map.dispose();
+      this.sun.shadow.map = null;
+    }
   }
 
   /* ── lifecycle ───────────────────────────────────────────────────────── */
@@ -224,9 +337,12 @@ export class Game {
 
   async quit() {
     this.renderer.setAnimationLoop(null);
+    this.canvas.removeEventListener('webglcontextlost', this._onContextLost);
+    this.canvas.removeEventListener('webglcontextrestored', this._onContextRestored);
     if (this.ar) await this.ar.end();
     this.input?.dispose();
     window.removeEventListener('resize', this._onResize);
+    this._pmrem?.dispose();
     this.renderer.dispose();
     this.cb.onQuit?.();
   }
@@ -543,6 +659,24 @@ export class Game {
     }, { passive: false });
   }
 
+  /**
+   * Slow turntable around the parked airframe while the briefing is on
+   * screen. The player's drag orbit (camAz/camEl) offsets the automatic
+   * phase, and prefers-reduced-motion freezes it to a single good angle.
+   */
+  _updateMenuCamera(dt) {
+    if (!this._reduceMotion) this._menuAngle += dt * 0.12;
+    const az = this._menuAngle + this.camAz;
+    const el = this.camEl;
+    const radius = 6.4;
+    this.camera.position.set(
+      Math.sin(az) * Math.cos(el) * radius,
+      2.4 + Math.sin(el) * radius,
+      Math.cos(az) * Math.cos(el) * radius,
+    );
+    this.camera.lookAt(0, 0.55, 0);
+  }
+
   _updateChaseCamera(dt) {
     const s = this.state;
     const az = this.camAz;
@@ -607,7 +741,29 @@ export class Game {
 
   /* ── main loop ───────────────────────────────────────────────────────── */
 
+  // setAnimationLoop keeps rescheduling even when a frame throws, which is
+  // exactly how the original black-screen bug stayed invisible: every frame
+  // failed into the console while the rotor audio kept playing. The wrapper
+  // surfaces any frame error on screen once and halts the loop.
   _tick = (timestamp, frame) => {
+    try {
+      this._frame(timestamp, frame);
+    } catch (err) {
+      console.error('[pmb-1.3] render loop error', err);
+      try {
+        this.renderer.setAnimationLoop(null);
+      } catch {
+        /* the context itself may be gone; the overlay still paints via DOM */
+      }
+      this._showFatal(
+        'Rendering error',
+        err?.message || String(err),
+        'Reload to try again. Reduced graphics mode (?quality=low) disables MSAA, caps resolution and shrinks the shadow maps.',
+      );
+    }
+  };
+
+  _frame = (timestamp, frame) => {
     const dt = Math.min(this.clock.getDelta(), 0.05);
     this.time += dt;
     this.ar?.poll(frame);
@@ -620,6 +776,8 @@ export class Game {
         this.world.update(this.time, dt, this.thermalOn);
         this.rig.update(this.state, null, this.thermalOn, dt);
       }
+      // In AR the XR pose drives the camera; only orbit in the simulator.
+      if (this.mode !== 'ar') this._updateMenuCamera(dt);
       this.renderer.render(this.scene, this.camera);
       return;
     }

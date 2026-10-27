@@ -203,6 +203,21 @@
     </div>
   </section>
 
+  <!-- ══════════ GRAPHICS FAILURE (context loss / render error) ══════════ -->
+  <section class="screen screen--compact" id="screen-fatal" data-screen hidden>
+    <div class="panel">
+      <p class="panel__eyebrow panel__eyebrow--danger">Graphics problem</p>
+      <h2 id="fatal-title">The render view stopped</h2>
+      <p class="fatal__message" id="fatal-message" role="alert"></p>
+      <p class="menu__note" id="fatal-advice" hidden></p>
+      <div class="menu__launch menu__launch--stack">
+        <button class="btn btn--primary" id="fatal-reload">Reload game</button>
+        <button class="btn" id="fatal-reload-low">Reload with reduced graphics</button>
+      </div>
+      <a class="menu__back" href="index.html">← Back to the payload showcase</a>
+    </div>
+  </section>
+
   <script type="module" src="src/game/main.js"></script>
 </body>
 </html>
