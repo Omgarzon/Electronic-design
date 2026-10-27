@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>B0GOTA PMB-1.3 — Structural inspection payload</title>
+  <meta name="description" content="PMB-1.3 is a dual-sensor structural inspection payload for inspection-class quadcopters: radiometric thermal, 48 MP visual and 0.3 mm crack grading in GPS-denied interiors. Explore the interactive 3D model." />
+  <meta name="theme-color" content="#070a0e" />
+  <meta name="color-scheme" content="dark" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="B0GOTA PMB-1.3 — Structural inspection payload" />
+  <meta property="og:description" content="Radiometric thermal, 48 MP visual and 0.3 mm crack grading in GPS-denied interiors. Explore the interactive 3D model." />
+  <meta property="og:image" content="assets/img/social-card.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="B0GOTA PMB-1.3 — Structural inspection payload" />
+  <meta name="twitter:description" content="Interactive 3D model of a dual-sensor structural inspection payload." />
+  <meta name="twitter:image" content="assets/img/social-card.jpg" />
+
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="sitemap" href="sitemap.xml" type="application/xml" title="Sitemap" />
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+  <link rel="preload" href="assets/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="styles/main.css" />
+  <script>document.documentElement.classList.add("js");</script>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./assets/vendor/three/build/three.module.js",
+        "three/addons/": "./assets/vendor/three/addons/"
+      }
+    }
+  </script>
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#mission">Skip to content</a>
+
+  <header class="site-header" data-header>
+    <div class="container site-header__inner">
+      <a class="brand" href="#top" aria-label="B0GOTA — back to top">
+        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <path d="M16 6.5v19M6.5 16h19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          <circle cx="16" cy="6.5" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6" />
+          <circle cx="16" cy="25.5" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6" />
+          <circle cx="6.5" cy="16" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6" />
+          <circle cx="25.5" cy="16" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6" />
+          <rect x="12.4" y="12.4" width="7.2" height="7.2" rx="1.6" fill="currentColor" />
+        </svg>
+        <span class="brand__text">
+          <span class="brand__name">B0GOTA</span>
+          <span class="brand__sub">PMB-1.3 payload</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <a href="#mission">Mission</a>
+        <a href="#payload">Payload</a>
+        <a href="#specs">Specs</a>
+        <a href="#model">Model files</a>
+      </nav>
+
+      <div class="site-header__actions">
+        <a class="btn btn--ghost btn--sm" href="https://github.com/Omgarzon/Electronic-design" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open menu">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <div class="mobile-nav" id="mobile-nav" hidden>
+      <a href="#mission">Mission</a>
+      <a href="#payload">Payload</a>
+      <a href="#specs">Specs</a>
+      <a href="#model">Model files</a>
+      <a href="https://github.com/Omgarzon/Electronic-design" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ─────────────────────────── HERO / 3D STAGE ─────────────────────────── -->
+    <section class="hero" id="hero" aria-labelledby="hero-title" data-hero>
+      <div class="stage" data-stage>
+        <canvas class="stage__canvas" data-canvas role="img" aria-label="Interactive 3D model of the PMB-1.3 inspection drone. Drag to orbit, scroll to zoom, or focus the canvas and use the arrow keys."></canvas>
+        <img class="stage__poster" data-poster src="assets/img/drone-hero.webp" width="1600" height="1200" alt="3D render of the PMB-1.3 inspection drone: a four-arm quadcopter carrying a dual-sensor payload module." />
+        <div class="hotspots" data-hotspots aria-hidden="true"></div>
+        <div class="stage__scrim"></div>
+      </div>
+
+      <div class="container hero__inner">
+        <div class="hero__copy">
+          <p class="eyebrow" data-reveal>
+            <span class="eyebrow__pulse" aria-hidden="true"></span>
+            PMB-1.3 · Structural inspection payload
+          </p>
+          <h1 class="hero__title" id="hero-title" data-reveal data-reveal-delay="1">
+            Inspect the <span class="accent">unreachable</span>.
+          </h1>
+          <p class="hero__lede" data-reveal data-reveal-delay="2">
+            A 1.3&nbsp;kg dual-sensor payload that turns an inspection-class quadcopter into a
+            structural survey instrument — radiometric thermal, 48&nbsp;MP visual and
+            millimetre crack grading, even in GPS-denied interiors.
+          </p>
+          <div class="hero__cta" data-reveal data-reveal-delay="3">
+            <button class="btn btn--primary" type="button" data-action="focus">
+              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M2.2 6V2.9c0-.4.3-.7.7-.7H6M10 2.2h3.1c.4 0 .7.3.7.7V6M13.8 10v3.1c0 .4-.3.7-.7.7H10M6 13.8H2.9c-.4 0-.7-.3-.7-.7V10"/></svg>
+              Take the controls
+            </button>
+            <a class="btn btn--ghost" href="#specs">Technical specifications</a>
+          </div>
+
+          <dl class="hero__stats" data-reveal data-reveal-delay="4">
+            <div><dt>Payload mass</dt><dd>1.3<span>kg</span></dd></div>
+            <div><dt>Thermal</dt><dd>640<span>×512</span></dd></div>
+            <div><dt>Crack grading</dt><dd>0.3<span>mm</span></dd></div>
+            <div><dt>Endurance</dt><dd>32<span>min</span></dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Viewer dock -->
+      <div class="dock" data-dock role="group" aria-label="3D model controls">
+        <div class="dock__status" data-loading hidden>
+          <span class="dock__status-label" data-loading-label>Loading model</span>
+          <span class="dock__bar"><span class="dock__bar-fill" data-bar></span></span>
+          <span class="dock__status-pct" data-pct>0%</span>
+        </div>
+        <button class="dock__btn" type="button" data-view="annotations" aria-pressed="true" title="Toggle annotations (N)">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" d="M10 3.2c3.2 0 5.8 2.3 5.8 5.1 0 2.9-2.6 5.2-5.8 5.2-.6 0-1.2-.1-1.7-.2L5 15.4l.9-2.6c-1-1-1.7-2.3-1.7-3.8 0-2.8 2.5-5.1 5.8-5.1Z"/><circle cx="7.6" cy="8.3" r=".9" fill="currentColor"/><circle cx="10" cy="8.3" r=".9" fill="currentColor"/><circle cx="12.4" cy="8.3" r=".9" fill="currentColor"/></svg>
+          <span class="dock__label">Annotations</span>
+        </button>
+        <button class="dock__btn" type="button" data-view="autorotate" aria-pressed="true" title="Toggle auto-rotate (A)">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M16 10a6 6 0 1 1-2.1-4.6M16 3.4V6h-2.6"/></svg>
+          <span class="dock__label">Auto-rotate</span>
+        </button>
+        <button class="dock__btn dock__btn--mode" type="button" data-view="mode" aria-pressed="false" title="Switch material set (M)">
+          <span class="dock__mode" data-mode-label>PBR</span>
+          <span class="dock__label">Material</span>
+        </button>
+        <button class="dock__btn" type="button" data-view="reset" title="Reset view (R)">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M4.4 7.2V4.1m0 0h3.1M4.4 4.1l2.3 2.3M15.6 12.8v3.1m0 0h-3.1m3.1 0-2.3-2.3M3.4 10a6.6 6.6 0 0 1 11.8-3.9M16.6 10a6.6 6.6 0 0 1-11.8 3.9"/></svg>
+          <span class="dock__label">Reset</span>
+        </button>
+        <button class="dock__btn" type="button" data-view="snapshot" title="Save a PNG snapshot">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" d="M3.2 6.6h2.4l1.1-1.7h6.6l1.1 1.7h2.4v8.2H3.2z"/><circle cx="10" cy="10.6" r="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+          <span class="dock__label">Snapshot</span>
+        </button>
+        <button class="dock__btn" type="button" data-view="focus" aria-pressed="false" title="Focus mode (F)">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M3.2 7.4V3.8c0-.3.3-.6.6-.6h3.6M12.6 3.2h3.6c.3 0 .6.3.6.6v3.6M16.8 12.6v3.6c0 .3-.3.6-.6.6h-3.6M7.4 16.8H3.8a.6.6 0 0 1-.6-.6v-3.6"/></svg>
+          <span class="dock__label">Focus</span>
+        </button>
+      </div>
+
+      <p class="stage-hint" data-hint>Drag to orbit · Scroll to zoom · <span class="kbd">F</span> focus · <span class="kbd">M</span> material</p>
+      <p class="focus-hint" aria-hidden="true">Press <span class="kbd">Esc</span> or <span class="kbd">F</span> to exit focus</p>
+      <div class="stage-fallback" data-fallback hidden>
+        <p><strong>3D preview unavailable.</strong> <span data-fallback-text>Your browser could not start WebGL — the rendered image is shown instead.</span></p>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────── TICKER ─────────────────────────────── -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track">
+        <span>Radiometric thermal</span><span class="ticker__dot"></span>
+        <span>0.3 mm crack grading</span><span class="ticker__dot"></span>
+        <span>GPS-denied navigation</span><span class="ticker__dot"></span>
+        <span>48 MP visual sensor</span><span class="ticker__dot"></span>
+        <span>3-axis gimbal</span><span class="ticker__dot"></span>
+        <span>IP54 airframe</span><span class="ticker__dot"></span>
+        <span>8 km link</span><span class="ticker__dot"></span>
+        <span>Hot-swap packs</span><span class="ticker__dot"></span>
+        <span>Radiometric thermal</span><span class="ticker__dot"></span>
+        <span>0.3 mm crack grading</span><span class="ticker__dot"></span>
+        <span>GPS-denied navigation</span><span class="ticker__dot"></span>
+        <span>48 MP visual sensor</span><span class="ticker__dot"></span>
+        <span>3-axis gimbal</span><span class="ticker__dot"></span>
+        <span>IP54 airframe</span><span class="ticker__dot"></span>
+        <span>8 km link</span><span class="ticker__dot"></span>
+        <span>Hot-swap packs</span><span class="ticker__dot"></span>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── MISSION ─────────────────────────────── -->
+    <section class="section mission" id="mission" aria-labelledby="mission-title">
+      <div class="container mission__grid">
+        <figure class="mission__figure" data-reveal>
+          <div class="mission__frame">
+            <img src="assets/img/prototype.webp" width="1280" height="738" loading="lazy" decoding="async"
+                 alt="Prototype quadcopter carrying the grey PMB-1.3 payload module, resting on the cracked concrete floor of a damaged building." />
+            <span class="mission__tag"><span class="mission__tag-dot" aria-hidden="true"></span>Field prototype · PMB-1.3</span>
+          </div>
+          <figcaption>
+            Reference airframe with the PMB-1.3 module mounted on the quick-release rail, during a
+            post-seismic survey walk-through.
+          </figcaption>
+        </figure>
+
+        <div class="mission__body">
+          <p class="eyebrow" data-reveal>Field notes · Bogotá</p>
+          <h2 class="h2" id="mission-title" data-reveal data-reveal-delay="1">Built for the inside of a disaster.</h2>
+          <p class="lede" data-reveal data-reveal-delay="2">
+            After an earthquake the question is not <em>whether</em> a building is damaged. It is which
+            rooms are still safe to enter. PMB-1.3 was designed around that question: small enough to
+            fly through a doorway, stable enough to hover 1.5&nbsp;m from a cracked column, and precise
+            enough to grade what it sees.
+          </p>
+
+          <ul class="feature-list" data-reveal data-reveal-delay="3">
+            <li>
+              <span class="feature-list__index">01</span>
+              <div>
+                <h3>Sub-millimetre crack grading</h3>
+                <p>Every frame is scaled against a calibrated reference, resolving 0.3&nbsp;mm cracks at a 2&nbsp;m standoff.</p>
+              </div>
+            </li>
+            <li>
+              <span class="feature-list__index">02</span>
+              <div>
+                <h3>Thermal and visual fusion</h3>
+                <p>Radiometric frames are aligned with the visual stream to reveal delamination, moisture ingress and hidden voids.</p>
+              </div>
+            </li>
+            <li>
+              <span class="feature-list__index">03</span>
+              <div>
+                <h3>No satellites required</h3>
+                <p>Visual–inertial and LiDAR fusion holds position inside concrete shells, basements and stairwells.</p>
+              </div>
+            </li>
+          </ul>
+
+          <div class="mission__metrics" data-reveal data-reveal-delay="4">
+            <div><span class="metric__value" data-count="0.3" data-decimals="1">0.3</span><span class="metric__unit">mm</span><span class="metric__label">Crack resolution</span></div>
+            <div><span class="metric__value" data-count="94">94</span><span class="metric__unit">%</span><span class="metric__label">Defect recall, field set</span></div>
+            <div><span class="metric__value" data-count="12">12</span><span class="metric__unit">min</span><span class="metric__label">Setup to first capture</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────── PAYLOAD ─────────────────────────────── -->
+    <section class="section section--panel payload" id="payload" aria-labelledby="payload-title">
+      <div class="container">
+        <div class="section__head">
+          <p class="eyebrow" data-reveal>The module</p>
+          <h2 class="h2" id="payload-title" data-reveal data-reveal-delay="1">One rail, two sensors,<br />zero excuses.</h2>
+          <p class="section__intro" data-reveal data-reveal-delay="2">
+            The payload is a sealed aluminium monocoque with a quick-release rail, a stabilised
+            dual-sensor head and a single cable run to the airframe. Swap it between aircraft in
+            under a minute; the calibration travels with the module.
+          </p>
+        </div>
+
+        <div class="cards">
+          <article class="card" data-reveal>
+            <span class="card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6.5" width="18" height="11" rx="2.2"/><circle cx="12" cy="12" r="3.4"/><path d="M17.5 9.6h.01" stroke-linecap="round" stroke-width="2"/></svg>
+            </span>
+            <h3 class="card__title">Dual-sensor head</h3>
+            <p class="card__body">
+              A 48&nbsp;MP 1/1.3″ visual sensor and a 640&nbsp;×&nbsp;512 radiometric thermal core on a
+              common optical bench, so every pixel of thermal data has a visual twin.
+            </p>
+            <ul class="card__meta">
+              <li><span>Visual</span><span>48 MP · f/2.8</span></li>
+              <li><span>Thermal</span><span>640 × 512 · 12 µm</span></li>
+              <li><span>Accuracy</span><span>±2 °C</span></li>
+            </ul>
+          </article>
+
+          <article class="card" data-reveal data-reveal-delay="1">
+            <span class="card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.4"/><path d="M9 2.2v1.8M15 2.2v1.8M9 20v1.8M15 20v1.8M2.2 9H4M2.2 15H4M20 9h1.8M20 15h1.8" stroke-linecap="round"/></svg>
+            </span>
+            <h3 class="card__title">Onboard compute</h3>
+            <p class="card__body">
+              40 TOPS of local inference grades cracks, flags spalling and writes a georeferenced
+              frame index in flight. Nothing critical depends on the downlink.
+            </p>
+            <ul class="card__meta">
+              <li><span>Compute</span><span>40 TOPS · 16 GB</span></li>
+              <li><span>Storage</span><span>512 GB NVMe</span></li>
+              <li><span>Logging</span><span>Raw + metadata</span></li>
+            </ul>
+          </article>
+
+          <article class="card" data-reveal data-reveal-delay="2">
+            <span class="card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.6v3M12 18.4v3M2.6 12h3M18.4 12h3M5.4 5.4l2.1 2.1M16.5 16.5l2.1 2.1M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1" stroke-linecap="round"/></svg>
+            </span>
+            <h3 class="card__title">Stabilised gimbal</h3>
+            <p class="card__body">
+              A three-axis head holds ±0.01° against gusts, letting the aircraft translate along a
+              wall while the sensor keeps a steady, motion-blur-free look.
+            </p>
+            <ul class="card__meta">
+              <li><span>Tilt range</span><span>−120° … +30°</span></li>
+              <li><span>Stabilisation</span><span>±0.01°</span></li>
+              <li><span>Modes</span><span>Follow · lock · scan</span></li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────── SPECS ─────────────────────────────── -->
+    <section class="section specs" id="specs" aria-labelledby="specs-title">
+      <div class="container">
+        <div class="section__head section__head--split">
+          <div>
+            <p class="eyebrow" data-reveal>Reference design</p>
+            <h2 class="h2" id="specs-title" data-reveal data-reveal-delay="1">Specifications.</h2>
+          </div>
+          <p class="section__intro section__intro--right" data-reveal data-reveal-delay="2">
+            Figures describe the reference airframe and payload combination modelled on this page.
+            Flight numbers are hover values at sea level with a full sensor load.
+          </p>
+        </div>
+
+        <div class="spec-shell" data-reveal>
+          <div class="tabs" role="tablist" aria-label="Specification categories">
+            <button class="tab" role="tab" id="tab-airframe" aria-controls="panel-airframe" aria-selected="true" tabindex="0">Airframe</button>
+            <button class="tab" role="tab" id="tab-payload" aria-controls="panel-payload" aria-selected="false" tabindex="-1">Payload</button>
+            <button class="tab" role="tab" id="tab-power" aria-controls="panel-power" aria-selected="false" tabindex="-1">Power</button>
+            <button class="tab" role="tab" id="tab-comms" aria-controls="panel-comms" aria-selected="false" tabindex="-1">Comms &amp; autonomy</button>
+          </div>
+
+          <div class="tab-panels">
+            <div class="tab-panel" id="panel-airframe" role="tabpanel" aria-labelledby="tab-airframe" tabindex="0">
+              <dl class="spec-list">
+                <div><dt>Rotor span</dt><dd>1 870 <span>mm</span></dd></div>
+                <div><dt>Frame height</dt><dd>770 <span>mm</span></dd></div>
+                <div><dt>Folded envelope</dt><dd>620 × 440 × 310 <span>mm</span></dd></div>
+                <div><dt>Frame</dt><dd>Carbon monocoque, four folding arms</dd></div>
+                <div><dt>Motors</dt><dd>4 × 1.2 <span>kW</span> brushless</dd></div>
+                <div><dt>Propellers</dt><dd>24 <span>in</span> folding, two-blade</dd></div>
+                <div><dt>Maximum take-off mass</dt><dd>11.4 <span>kg</span></dd></div>
+                <div><dt>Ingress protection</dt><dd>IP54 airframe, IPX3 payload</dd></div>
+              </dl>
+            </div>
+
+            <div class="tab-panel" id="panel-payload" role="tabpanel" aria-labelledby="tab-payload" tabindex="0" hidden>
+              <dl class="spec-list">
+                <div><dt>Module</dt><dd>PMB-1.3, quick-release rail</dd></div>
+                <div><dt>Mass</dt><dd>1.3 <span>kg</span></dd></div>
+                <div><dt>Visual sensor</dt><dd>48 <span>MP</span> 1/1.3″ CMOS, f/2.8, 24 mm eq.</dd></div>
+                <div><dt>Thermal core</dt><dd>640 × 512 <span>px</span>, 12 <span>µm</span> pitch, radiometric</dd></div>
+                <div><dt>Thermal range</dt><dd>−20 … +150 <span>°C</span>, ±2 <span>°C</span></dd></div>
+                <div><dt>Gimbal</dt><dd>3-axis, ±0.01° stabilisation</dd></div>
+                <div><dt>Crack grading</dt><dd>0.3 <span>mm</span> at 2 <span>m</span> standoff</dd></div>
+                <div><dt>Capture</dt><dd>4K/60 H.265 · 16-bit radiometric TIFF</dd></div>
+              </dl>
+            </div>
+
+            <div class="tab-panel" id="panel-power" role="tabpanel" aria-labelledby="tab-power" tabindex="0" hidden>
+              <dl class="spec-list">
+                <div><dt>Battery</dt><dd>2 × 6S 12 <span>Ah</span> Li-ion, hot-swap</dd></div>
+                <div><dt>Endurance</dt><dd>32 <span>min</span> hover with payload</dd></div>
+                <div><dt>Charging</dt><dd>0 → 90 <span>%</span> in 45 <span>min</span></dd></div>
+                <div><dt>Hover draw</dt><dd>780 <span>W</span></dd></div>
+                <div><dt>Reserve</dt><dd>20 <span>%</span> pack reserve, automatic return</dd></div>
+                <div><dt>Connector</dt><dd>Single sealed harness, tool-free</dd></div>
+              </dl>
+            </div>
+
+            <div class="tab-panel" id="panel-comms" role="tabpanel" aria-labelledby="tab-comms" tabindex="0" hidden>
+              <dl class="spec-list">
+                <div><dt>Link</dt><dd>2.4 / 5.8 <span>GHz</span> + LTE fallback</dd></div>
+                <div><dt>Range</dt><dd>8 <span>km</span> line of sight</dd></div>
+                <div><dt>Onboard compute</dt><dd>40 <span>TOPS</span>, 16 <span>GB</span></dd></div>
+                <div><dt>Navigation</dt><dd>Visual–inertial + LiDAR, GNSS-denied</dd></div>
+                <div><dt>Flight modes</dt><dd>Manual · assist · corridor-auto</dd></div>
+                <div><dt>Geofence</dt><dd>3D volume with automatic hold</dd></div>
+                <div><dt>Failsafe</dt><dd>Link-loss hold, then return-to-home</dd></div>
+              </dl>
+            </div>
+          </div>
+
+          <p class="spec-note">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M8 7.2v4M8 4.9v.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Reference figures for the concept design shown in the 3D model. Not a flight manual.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────── MODEL FILES ─────────────────────────────── -->
+    <section class="section section--panel model" id="model" aria-labelledby="model-title">
+      <div class="container">
+        <div class="section__head section__head--split">
+          <div>
+            <p class="eyebrow" data-reveal>Open assets</p>
+            <h2 class="h2" id="model-title" data-reveal data-reveal-delay="1">Take the model with you.</h2>
+          </div>
+          <p class="section__intro section__intro--right" data-reveal data-reveal-delay="2">
+            The same geometry you are orbiting above, published as glTF&nbsp;2.0 binaries. The web build is
+            meshopt-compressed with WebP textures; the untouched exports stay in the repository.
+          </p>
+        </div>
+
+        <div class="downloads">
+          <article class="download" data-reveal>
+            <div class="download__preview">
+              <img src="assets/img/variant-pbr.webp" width="800" height="500" loading="lazy" decoding="async" alt="Render of the drone with physically based materials: textured panels, metal roughness and normal detail." />
+              <span class="download__badge">Default view</span>
+            </div>
+            <div class="download__body">
+              <h3>PBR · full material set</h3>
+              <p>Base colour, metallic–roughness and normal maps. Reacts to the scene environment and lights.</p>
+              <ul class="download__facts">
+                <li><span>Web build</span><span>3.1 MB</span></li>
+                <li><span>Triangles</span><span>394 534</span></li>
+                <li><span>Extensions</span><span>meshopt · quantize · WebP</span></li>
+              </ul>
+              <div class="download__actions">
+                <a class="btn btn--primary btn--sm" href="assets/models/drone-pbr.glb" download>
+                  <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M8 2.6v7.2M5 7.1 8 10l3-2.9M3.2 12.4v1h9.6v-1"/></svg>
+                  Download .glb
+                </a>
+                <a class="btn btn--ghost btn--sm" href="https://github.com/Omgarzon/Electronic-design/blob/main/base_basic_pbr.glb" target="_blank" rel="noopener">Original 24.6 MB ↗</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="download" data-reveal data-reveal-delay="1">
+            <div class="download__preview">
+              <img src="assets/img/variant-baked.webp" width="800" height="500" loading="lazy" decoding="async" alt="Render of the drone with baked lighting: the look of a pre-lit studio render, stored as a single emissive texture." />
+              <span class="download__badge">Baked / shaded</span>
+            </div>
+            <div class="download__body">
+              <h3>Baked lighting · single texture</h3>
+              <p>Lighting baked into one emissive texture. Ideal for lightweight viewers or low-power devices.</p>
+              <ul class="download__facts">
+                <li><span>Web build</span><span>2.9 MB</span></li>
+                <li><span>Triangles</span><span>394 534</span></li>
+                <li><span>Extensions</span><span>meshopt · quantize · WebP</span></li>
+              </ul>
+              <div class="download__actions">
+                <a class="btn btn--primary btn--sm" href="assets/models/drone-shaded.glb" download>
+                  <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M8 2.6v7.2M5 7.1 8 10l3-2.9M3.2 12.4v1h9.6v-1"/></svg>
+                  Download .glb
+                </a>
+                <a class="btn btn--ghost btn--sm" href="https://github.com/Omgarzon/Electronic-design/blob/main/base_basic_shaded.glb" target="_blank" rel="noopener">Original 19.1 MB ↗</a>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="model-notes" data-reveal>
+          <div>
+            <h3 class="h3">Loading the compressed model</h3>
+            <p>
+              The web builds use <code>EXT_meshopt_compression</code>, <code>KHR_mesh_quantization</code>
+              and WebP textures. Register the meshopt decoder before loading:
+            </p>
+          </div>
+          <pre class="code"><code><span class="code__c">// three.js r186</span>
+<span class="code__k">import</span> { GLTFLoader } <span class="code__k">from</span> <span class="code__s">'three/addons/loaders/GLTFLoader.js'</span>;
+<span class="code__k">import</span> { MeshoptDecoder } <span class="code__k">from</span> <span class="code__s">'three/addons/libs/meshopt_decoder.module.js'</span>;
+
+<span class="code__k">const</span> loader = <span class="code__k">new</span> GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+<span class="code__k">const</span> { scene } = <span class="code__k">await</span> loader.loadAsync(<span class="code__s">'assets/models/drone-pbr.glb'</span>);</code></pre>
+        </div>
+
+        <dl class="model-stats" data-reveal>
+          <div><dt>Source files</dt><dd>Blender 4.3 · glTF 2.0</dd></div>
+          <div><dt>Compression</dt><dd>24.6 MB → 3.1 MB</dd></div>
+          <div><dt>Textures</dt><dd>2048² WebP</dd></div>
+          <div><dt>Renderer</dt><dd>Three.js r186</dd></div>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div class="site-footer__brand">
+        <span class="brand__name">B0GOTA</span>
+        <p>Structural inspection payload · interactive model</p>
+      </div>
+      <nav class="site-footer__nav" aria-label="Footer">
+        <a href="#mission">Mission</a>
+        <a href="#payload">Payload</a>
+        <a href="#specs">Specs</a>
+        <a href="#model">Model files</a>
+        <a href="https://github.com/Omgarzon/Electronic-design" target="_blank" rel="noopener">Repository ↗</a>
+      </nav>
+      <p class="site-footer__legal">
+        <span>© <span data-year>2026</span> B0GOTA project</span>
+        <span>Static site · deployed with GitHub Pages</span>
+        <span>Model rendered in Three.js · fonts under the SIL OFL</span>
+      </p>
+    </div>
+  </footer>
+
+  <noscript>
+    <div class="noscript">This page uses JavaScript for the interactive 3D model. The rendered preview and all specifications above remain available without it.</div>
+  </noscript>
+</body>
+</html>

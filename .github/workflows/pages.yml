@@ -1,0 +1,91 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # verify the build on every PR without deploying it
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Allow one concurrent deployment, cancelling unpushed builds in favour of the newest.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build static site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify vendored assets match package-lock
+        run: |
+          npm run vendor
+          git diff --exit-code -- assets/vendor assets/fonts
+
+      - name: Check references and decoders
+        run: npm run check
+
+      - name: Build _site
+        run: npm run build
+
+      - name: Configure Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v6
+
+      - name: Upload artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy
+    # PRs build and check the site, but only main publishes it
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # deploy-pages only works when Settings → Pages → Source is set to
+      # "GitHub Actions". If the repository is still building from a branch,
+      # explain that instead of failing the run — the branch build keeps
+      # serving the site in the meantime (see _config.yml).
+      - name: Check the Pages source
+        id: source
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          build_type=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq '.build_type' 2>/dev/null || echo missing)
+          echo "build_type=${build_type}" >> "$GITHUB_OUTPUT"
+          if [ "$build_type" != "workflow" ]; then
+            echo "::warning title=Switch Pages to GitHub Actions::Pages is building from a branch (${build_type}). Open Settings → Pages → Build and deployment → Source and choose "GitHub Actions" to publish this optimized build; then re-run this workflow."
+          else
+            echo "Pages source is GitHub Actions."
+          fi
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        if: steps.source.outputs.build_type == 'workflow'
+        uses: actions/deploy-pages@v5
