@@ -68,6 +68,24 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # deploy-pages only works when Settings → Pages → Source is set to
+      # "GitHub Actions". If the repository is still building from a branch,
+      # explain that instead of failing the run — the branch build keeps
+      # serving the site in the meantime (see _config.yml).
+      - name: Check the Pages source
+        id: source
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          build_type=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq '.build_type' 2>/dev/null || echo missing)
+          echo "build_type=${build_type}" >> "$GITHUB_OUTPUT"
+          if [ "$build_type" != "workflow" ]; then
+            echo "::warning title=Switch Pages to GitHub Actions::Pages is building from a branch (${build_type}). Open Settings → Pages → Build and deployment → Source and choose "GitHub Actions" to publish this optimized build; then re-run this workflow."
+          else
+            echo "Pages source is GitHub Actions."
+          fi
+
       - name: Deploy to GitHub Pages
         id: deployment
+        if: steps.source.outputs.build_type == 'workflow'
         uses: actions/deploy-pages@v5

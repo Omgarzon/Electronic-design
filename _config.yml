@@ -1,0 +1,37 @@
+# Jekyll configuration for GitHub Pages.
+#
+# The published site is built by the workflow in .github/workflows/pages.yml,
+# which uploads a prepared _site directory. This file only matters when Pages
+# is left on "Deploy from a branch", where Jekyll builds the repository root
+# directly: it keeps the large source exports and the development tooling out
+# of that build so both deployment modes publish the same, lean site.
+#
+# Nothing here is used by `npm run build`.
+
+exclude:
+  # original, unoptimised model exports (45 MB) — the web builds live in assets/models
+  - base_basic_pbr.glb
+  - base_basic_shaded.glb
+  - imagen_prototipo.jpeg
+  # build output and tooling
+  - _site
+  - node_modules
+  - scripts
+  - package.json
+  - package-lock.json
+  - README.md
+  - .dev
+  - .github
+
+# keep the files Pages needs to serve as-is
+include:
+  - .nojekyll
+
+# no theme, no plugins: the page is hand-written HTML/CSS/ES modules
+plugins: []
+
+defaults:
+  - scope:
+      path: ''
+    values:
+      layout: null
