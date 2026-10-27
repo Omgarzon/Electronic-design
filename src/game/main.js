@@ -21,7 +21,12 @@ const PHASE_SCREEN = {
 };
 
 function showScreen(id) {
-  document.querySelectorAll('[data-screen]').forEach((s) => {
+  // Only the overlay sections carry a data-screen flag and must be toggled.
+  // The <body> element also has data-screen (a static state hook in
+  // game.html); selecting it here would set body.hidden = true on the first
+  // screen change, hiding the whole document — audio keeps playing on a
+  // completely black page, which was the reported black-screen bug.
+  document.querySelectorAll('section[data-screen]').forEach((s) => {
     s.hidden = s.id !== id;
   });
 }
